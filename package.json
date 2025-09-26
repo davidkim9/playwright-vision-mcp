@@ -1,0 +1,37 @@
+{
+  "name": "n8n-playwright-mcp-server",
+  "version": "1.0.0",
+  "description": "n8n MCP server with Playwright browser automation capabilities",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "dev:old": "tsx src/n8n-mcp-server.ts",
+    "install-browsers": "playwright install"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "playwright": "^1.49.0",
+    "express": "^4.21.1",
+    "cors": "^2.8.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.2"
+  },
+  "keywords": [
+    "n8n",
+    "mcp",
+    "playwright",
+    "browser-automation",
+    "web-scraping"
+  ],
+  "author": "n8n MCP Server",
+  "license": "MIT"
+}
