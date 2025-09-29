@@ -1,5 +1,7 @@
 # Playwright MCP Server
 
+![Let it run code](image.png)
+
 A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
 
 ## Features
@@ -111,17 +113,9 @@ return { title, screenshotSize: screenshot.length };
    npm install
    ```
 
-3. **Install Playwright browsers**
-   ```bash
-   npm run install-browsers
-   ```
+   This will install + build + install playwright browsers
 
-4. **Build the project**
-   ```bash
-   npm run build
-   ```
-
-5. **Run the server**
+3. **Run the server**
 
    For HTTP transport (n8n):
    ```bash
