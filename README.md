@@ -4,6 +4,16 @@
 
 A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
 
+## Features
+
+- 🌐 **Multi-Browser Support** - Chromium, Firefox, and WebKit
+- 🔄 **Session Management** - Persistent browser sessions for multi-step workflows
+- 📸 **Screenshot Capture** - Full-page and element-specific screenshots
+- 📝 **Content Extraction** - Text content from pages or specific selectors
+- 🖱️ **Element Interaction** - Click elements and interact with pages
+- 🎭 **Custom Scripts** - Execute arbitrary Playwright code
+- 🚀 **Dual Transport** - HTTP and stdio (for Claude Code)
+
 - [Playwright MCP Server](#playwright-mcp-server)
   - [Features](#features)
   - [Available Tools](#available-tools)
@@ -37,17 +47,6 @@ A powerful Model Context Protocol (MCP) server that provides browser automation 
   - [Contributing](#contributing)
   - [License](#license)
   - [Acknowledgments](#acknowledgments)
-
-
-## Features
-
-- 🌐 **Multi-Browser Support** - Chromium, Firefox, and WebKit
-- 🔄 **Session Management** - Persistent browser sessions for multi-step workflows
-- 📸 **Screenshot Capture** - Full-page and element-specific screenshots
-- 📝 **Content Extraction** - Text content from pages or specific selectors
-- 🖱️ **Element Interaction** - Click elements and interact with pages
-- 🎭 **Custom Scripts** - Execute arbitrary Playwright code
-- 🚀 **Dual Transport** - HTTP and stdio (for Claude Code)
 
 ## Available Tools
 
