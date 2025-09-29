@@ -111,7 +111,7 @@ app.listen(PORT, (error) => {
 });
 
 // Handle server shutdown and cleanup
-process.on('SIGINT', async () => {
+const cleanup = async () => {
   console.log('\\n🔄 Shutting down server...');
 
   // Close all browser sessions
@@ -127,4 +127,7 @@ process.on('SIGINT', async () => {
   browserSessions.clear();
   console.log('👋 Server shutdown complete');
   process.exit(0);
-});
+};
+
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
