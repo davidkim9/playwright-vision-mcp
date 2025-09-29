@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:stdio": "node dist/stdio-server.js",
     "dev": "tsx src/server.ts",
+    "dev:stdio": "tsx src/stdio-server.ts",
     "dev:old": "tsx src/n8n-mcp-server.ts",
     "install-browsers": "playwright install"
   },

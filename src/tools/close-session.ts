@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ToolDefinition, ToolContext } from '../shared/types.js';
 import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+import { getSession } from '../utils/browserUtils.js';
 
 const schema = z.object({
   sessionId: z.string().optional().describe('Session ID of the browser instance to close. If not provided, closes all sessions')
@@ -12,7 +13,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
     if (sessionId) {
       const sessionKey = sessionId === 'default' ? 'default' : sessionId;
-      const session = context.browserSessions.get(sessionKey);
+      const session = getSession(sessionKey, context.browserSessions);
 
       if (!session) {
         return createErrorResponse(`No browser session found with ID: ${sessionKey}`);

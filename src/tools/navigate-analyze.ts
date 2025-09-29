@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { chromium, firefox, webkit } from 'playwright';
 import type { ToolDefinition, ToolContext } from '../shared/types.js';
 import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+import { getOrCreateSession, getBrowserType } from '../utils/browserUtils.js';
 
 const schema = z.object({
   url: z.string().url().describe('The URL to navigate to'),
@@ -12,7 +12,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
   try {
     const { url, sessionId } = params;
     // Sensible defaults kept internally to maintain functionality
-    const browserType = 'chromium' as const;
+    const browserType = getBrowserType();
     const waitForLoad = true;
     const timeout = 30000;
     const sectionTypes: Array<'semantic' | 'visual' | 'layout'> = ['semantic', 'visual'];
@@ -22,27 +22,8 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const verbose = false;
     const sessionKey = sessionId || 'default';
 
-    let session = context.browserSessions.get(sessionKey);
-
-    if (!session || session.browserType !== browserType) {
-      if (session) {
-        await session.browser.close();
-      }
-
-      const browser = await chromium.launch();
-
-      const browserContext = await browser.newContext();
-      const page = await browserContext.newPage();
-
-      session = {
-        browser,
-        context: browserContext,
-        page,
-        browserType
-      };
-
-      context.browserSessions.set(sessionKey, session);
-    }
+    // Get or create browser session
+    const session = await getOrCreateSession(sessionKey, browserType, context.browserSessions);
 
     const response = await session.page.goto(url, {
       waitUntil: waitForLoad ? 'networkidle' : 'domcontentloaded',

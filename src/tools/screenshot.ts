@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ToolDefinition, ToolContext } from '../shared/types.js';
 import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+import { getSession } from '../utils/browserUtils.js';
 import path from 'path';
 import { ensureDirectoryExists, generateScreenshotFilename } from '../utils/fileUtils.js';
 
@@ -18,7 +19,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const omitBackground = false;
     const fullPage = !selector;
     const sessionKey = sessionId || 'default';
-    const session = context.browserSessions.get(sessionKey);
+    const session = getSession(sessionKey, context.browserSessions);
 
     if (!session) {
       return createErrorResponse('No active browser session found. Use navigate_url first.');
@@ -26,8 +27,8 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
     const targetSelector = selector;
 
-    // Save into a per-session subdirectory under the project's screenshots directory
-    const screenshotsDir = path.resolve(process.cwd(), 'screenshots');
+    // Save into a per-session subdirectory under the configured or default screenshots directory
+    const screenshotsDir = process.env.SCREENSHOT_DIR || path.resolve(process.cwd(), 'screenshots');
     const sessionDir = path.join(screenshotsDir, sessionKey);
     ensureDirectoryExists(sessionDir);
 

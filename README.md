@@ -1,253 +1,506 @@
-# n8n Playwright MCP Server
+# Playwright MCP Server
 
-A Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright for n8n workflows.
+A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
 
 ## Features
 
-- **Browser Navigation**: Navigate to URLs with support for Chromium, Firefox, and WebKit
-- **Content Extraction**: Extract text content from entire pages or specific CSS selectors
-- **Screenshot Capture**: Take full-page or element-specific screenshots
-- **Session Management**: Persistent browser sessions for multi-step workflows
-- **Multiple Browser Support**: Chromium, Firefox, and WebKit browsers
+- 🌐 **Multi-Browser Support** - Chromium, Firefox, and WebKit
+- 🔄 **Session Management** - Persistent browser sessions for multi-step workflows
+- 📸 **Screenshot Capture** - Full-page and element-specific screenshots
+- 📝 **Content Extraction** - Text content from pages or specific selectors
+- 🖱️ **Element Interaction** - Click elements and interact with pages
+- 🎭 **Custom Scripts** - Execute arbitrary Playwright code
+- 🚀 **Dual Transport** - HTTP and stdio (for Claude Code)
 
-## Tools Available
+## Available Tools
 
-### Core Browser Tools
-
-#### 1. `browser_navigate`
-Navigate to a URL using Playwright browser automation.
+### 1. `navigate_url`
+Navigate to a URL and automatically analyze page structure.
 
 **Parameters:**
 - `url` (required): The URL to navigate to
-- `browserType` (optional): Browser type ('chromium', 'firefox', 'webkit'). Default: 'chromium'
-- `sessionId` (optional): Session ID to reuse browser instance
-- `waitForLoad` (optional): Wait for page load completion. Default: true
-- `timeout` (optional): Navigation timeout in milliseconds. Default: 30000
+- `sessionId` (optional): Session ID to reuse browser instance (default: "default")
 
-#### 2. `get_page_content`
-Extract text content from the current page or specific elements.
+**Returns:**
+- Page title, URL, and HTTP status
+- Automatically identified page sections (semantic, visual, layout)
+- Internal links found on the page
+- Summary statistics
 
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `selector` (optional): CSS selector for specific elements
-- `contentType` (optional): Type of content ('text', 'html', 'innerText'). Default: 'text'
-- `multiple` (optional): Extract from multiple elements. Default: false
-
-#### 3. `take_screenshot`
-Capture screenshots of entire pages or specific elements and save to file for MCP tool processing.
+### 2. `get_content`
+Extract text content from the page or specific elements.
 
 **Parameters:**
 - `sessionId` (optional): Session ID of the browser instance
-- `selector` (optional): CSS selector for specific element
-- `format` (optional): Image format ('png', 'jpeg'). Default: 'png'
-- `quality` (optional): Image quality for JPEG (0-100). Default: 80
-- `fullPage` (optional): Capture full scrollable page. Default: true
-- `tempDir` (optional): Directory to save temporary screenshots. Default: './temp-screenshots'
+- `selector` (optional): CSS selector to extract content from
 
-**Response:**
-- Returns `filePath` (absolute path to saved file) instead of base64 data
-- Includes `isTemporary: true` flag for temporary files
-- Automatically generates unique filenames with timestamp and session ID
+**Returns:**
+- Extracted text content
+- Content length and truncation info
+- Page title and URL
 
-#### 4. `browser_close`
-Close browser sessions and cleanup resources.
-
-**Parameters:**
-- `sessionId` (optional): Session ID to close
-- `closeType` (optional): What to close ('session', 'page', 'all'). Default: 'session'
-
-#### 5. `browser_session_info`
-Get information about active browser sessions.
-
-### QA and Analysis Tools
-
-#### 6. `find_selector_by_text`
-Find CSS selectors for elements containing specific text content.
+### 3. `take_screenshot`
+Capture screenshots of pages or specific elements.
 
 **Parameters:**
 - `sessionId` (optional): Session ID of the browser instance
-- `text` (required): Text content to search for
-- `exactMatch` (optional): Whether to match exact text or partial text. Default: false
-- `includeParents` (optional): Include parent element selectors. Default: true
-- `maxResults` (optional): Maximum number of results to return. Default: 10
+- `selector` (optional): CSS selector to screenshot specific element
 
-**Use Case:** Perfect for locating elements by their text content for further analysis or interaction.
+**Returns:**
+- File path to saved screenshot
+- Screenshot size and format
+- Page title and URL
 
-#### 7. `analyze_page_sections`
-Break down the page into logical sections for visual analysis and QA testing.
-
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `sectionTypes` (optional): Types of analysis ('semantic', 'visual', 'layout'). Default: ['semantic', 'visual']
-- `minSectionSize` (optional): Minimum size in pixels for a section. Default: 100
-- `includeHidden` (optional): Include hidden elements. Default: false
-
-**Use Case:** Identifies semantic sections (header, nav, main), visual components (cards, banners), and layout containers for systematic QA testing.
-
-#### 8. `capture_section_screenshots`
-Capture screenshots of specific page sections for visual analysis.
+### 4. `click_element`
+Click on elements using CSS selectors.
 
 **Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `sectionSelectors` (optional): Array of CSS selectors for sections to capture
-- `outputDir` (optional): Directory to save screenshots. Default: './screenshots'
-- `format` (optional): Image format ('png', 'jpeg'). Default: 'png'
-- `quality` (optional): Image quality for JPEG (0-100). Default: 80
-- `addBorder` (optional): Add visual border around sections. Default: true
-- `includeMetadata` (optional): Include element metadata. Default: true
-
-**Use Case:** Automatically captures visual screenshots of each page section with metadata for comprehensive visual QA analysis.
-
-**Response:**
-- Returns `filePath` (absolute path to saved file) for each screenshot instead of base64 data
-- Includes `isTemporary: false` flag for persistent files
-- Automatically generates unique filenames with timestamp and section info
-
-#### 9. `analyze_page_qa`
-Perform comprehensive QA analysis including accessibility, performance, SEO, and structural issues.
-
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `checkAccessibility` (optional): Check for accessibility issues. Default: true
-- `checkPerformance` (optional): Check for performance issues. Default: true
-- `checkSEO` (optional): Check for SEO issues. Default: true
-- `checkStructure` (optional): Check for structural issues. Default: true
-- `includeElementCounts` (optional): Include counts of different elements. Default: true
-
-**Use Case:** Provides comprehensive QA scores and detailed issue analysis covering:
-- **Accessibility**: Alt text, labels, heading hierarchy, ARIA attributes
-- **Performance**: Large images, inline styles, external resources
-- **SEO**: Meta tags, title length, canonical links, structured data
-- **Structure**: Semantic elements, proper nesting, deprecated tags
-
-### Enhanced QA and Interaction Tools
-
-#### 10. `click_element`
-Click elements on the page for interaction testing.
-
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
 - `selector` (required): CSS selector of the element to click
-- `button` (optional): Mouse button to use ('left', 'right', 'middle'). Default: 'left'
-- `timeout` (optional): Timeout in milliseconds to wait for element. Default: 30000
-- `waitForResponse` (optional): Wait for network responses after clicking. Default: true
-- `modifiers` (optional): Modifier keys to hold during click (['Alt', 'Control', 'Meta', 'Shift'])
+- `sessionId` (optional): Session ID of the browser instance
 
-**Use Case:** Test button clicks, link navigation, form submissions, and interactive elements.
+**Returns:**
+- Success status
+- Current URL and page title after click
 
-#### 11. `fill_form_field`
-Fill form inputs for comprehensive form testing and validation.
+### 5. `close_session`
+Close browser sessions to free up resources.
 
 **Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `selector` (required): CSS selector of the form field to fill
-- `value` (required): Value to enter into the form field
-- `inputType` (optional): Type of input field ('text', 'select', 'radio', 'checkbox', 'file'). Default: 'text'
-- `clearFirst` (optional): Clear the field before filling. Default: true
-- `timeout` (optional): Timeout in milliseconds to wait for element. Default: 30000
-- `triggerEvents` (optional): Trigger input and change events after filling. Default: true
+- `sessionId` (optional): Session ID to close. If omitted, closes all sessions
 
-**Use Case:** Test form functionality, input validation, different field types, and form submission workflows.
+**Returns:**
+- Number of closed sessions
+- Session IDs that were closed
 
-#### 12. `wait_for_element`
-Wait for elements to appear, disappear, or change state for dynamic content testing.
+### 6. `run_playwright`
+Execute custom async Playwright code with full access to the browser API.
 
 **Parameters:**
+- `code` (required): Async JavaScript code to execute
 - `sessionId` (optional): Session ID of the browser instance
-- `selector` (required): CSS selector of the element to wait for
-- `state` (optional): State to wait for ('visible', 'hidden', 'attached', 'detached'). Default: 'visible'
-- `timeout` (optional): Timeout in milliseconds to wait for element. Default: 30000
-- `checkInterval` (optional): Interval in milliseconds to check element state. Default: 100
-- `returnElementInfo` (optional): Return detailed element information when found. Default: true
+- `timeoutMs` (optional): Execution timeout in milliseconds (default: 15000, max: 120000)
 
-**Use Case:** Test single-page applications, AJAX content loading, dynamic UI changes, and progressive enhancement.
+**Returns:**
+- Return value from executed code
+- Execution duration
+- Console logs captured during execution
 
-#### 13. `get_page_metrics`
-Extract comprehensive performance timing data and metrics from the current page.
-
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `includeNavigation` (optional): Include navigation timing data. Default: true
-- `includeResources` (optional): Include resource timing data. Default: true
-- `includePaint` (optional): Include paint timing data. Default: true
-- `includeMemory` (optional): Include memory usage data (if available). Default: false
-- `includeLayoutShift` (optional): Include cumulative layout shift data. Default: true
-
-**Use Case:** Performance analysis covering navigation timing, resource loading, paint metrics, core web vitals, and memory usage.
-
-#### 14. `check_broken_links`
-Validate all links on the page and identify broken or problematic links.
-
-**Parameters:**
-- `sessionId` (optional): Session ID of the browser instance
-- `includeExternal` (optional): Include external links in the check. Default: true
-- `includeInternal` (optional): Include internal links in the check. Default: true
-- `timeout` (optional): Timeout in milliseconds for each link check. Default: 10000
-- `maxConcurrent` (optional): Maximum number of concurrent link checks. Default: 5
-- `followRedirects` (optional): Follow redirects when checking links. Default: true
-- `checkAnchors` (optional): Check anchor links (hash fragments). Default: false
-
-**Use Case:** Link validation, SEO auditing, broken link detection, and redirect analysis with health scoring.
+**Example:**
+```javascript
+const title = await page.title();
+const screenshot = await page.screenshot({ fullPage: true });
+return { title, screenshotSize: screenshot.length };
+```
 
 ## Installation
 
-1. Install dependencies:
-```bash
-npm install
-```
+### Prerequisites
+- Node.js 18 or higher
+- npm or yarn
 
-2. Install Playwright browsers:
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd playwright-mcp
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Install Playwright browsers**
+   ```bash
+   npm run install-browsers
+   ```
+
+4. **Build the project**
+   ```bash
+   npm run build
+   ```
+
+5. **Run the server**
+
+   For HTTP transport (n8n):
+   ```bash
+   npm start
+   ```
+
+   For stdio transport (Claude Code):
+   ```bash
+   npm run start:stdio
+   ```
+
+## Development
+
+### Development Scripts
+
 ```bash
+# Start HTTP server with auto-reload
+npm run dev
+
+# Start stdio server with auto-reload
+npm run dev:stdio
+
+# Build TypeScript to JavaScript
+npm run build
+
+# Install Playwright browsers
 npm run install-browsers
 ```
 
-3. Build the project:
-```bash
-npm run build
+### Project Structure
+
+```
+playwright-mcp/
+├── src/
+│   ├── server.ts              # HTTP server (StreamableHTTP transport)
+│   ├── stdio-server.ts        # Stdio server (for Claude Code)
+│   ├── tools/                 # Tool implementations
+│   │   ├── navigate-analyze.ts
+│   │   ├── get-content.ts
+│   │   ├── screenshot.ts
+│   │   ├── click-element.ts
+│   │   ├── close-session.ts
+│   │   ├── run-playwright.ts
+│   │   └── registry.ts        # Tool registration
+│   ├── utils/                 # Utility functions
+│   │   ├── browserUtils.ts    # Browser session management
+│   │   ├── fileUtils.ts       # File operations
+│   │   └── responseUtils.ts   # Response formatting
+│   └── shared/
+│       └── types.ts           # TypeScript types
+├── dist/                      # Compiled JavaScript (generated)
+├── screenshots/               # Screenshot output directory
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
-4. Start the server:
-```bash
-npm start
+### Making Changes
+
+1. Edit TypeScript files in `src/`
+2. Run `npm run build` to compile
+3. Test your changes with `npm run dev` or `npm run dev:stdio`
+
+### Adding New Tools
+
+1. Create a new file in `src/tools/`
+2. Implement the `ToolDefinition` interface
+3. Register the tool in `src/tools/registry.ts`
+
+Example:
+```typescript
+import { z } from 'zod';
+import type { ToolDefinition, ToolContext } from '../shared/types.js';
+import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+import { getSession } from '../utils/browserUtils.js';
+
+const schema = z.object({
+  sessionId: z.string().optional(),
+  // ... your parameters
+});
+
+async function handler(params: z.infer<typeof schema>, context: ToolContext) {
+  const sessionKey = params.sessionId || 'default';
+  const session = getSession(sessionKey, context.browserSessions);
+
+  if (!session) {
+    return createErrorResponse('No active browser session found.');
+  }
+
+  // ... your tool logic
+
+  return createSuccessResponse({
+    success: true,
+    // ... your response data
+  });
+}
+
+export const myTool: ToolDefinition = {
+  name: 'my_tool',
+  description: 'Description of what my tool does',
+  inputSchema: schema,
+  handler
+};
 ```
 
-For development:
-```bash
-npm run dev
-```
+## Configuration
 
-## Usage
+### Environment Variables
 
-The server runs on port 3000 by default. Send MCP requests to `http://localhost:3000/mcp`.
+Configure the server behavior using environment variables:
 
-### Example MCP Request
+| Variable | Description | Default | Options |
+|----------|-------------|---------|---------|
+| `PLAYWRIGHT_HEADLESS` | Run browser in headless mode | `true` | `true`, `false` |
+| `BROWSER_TYPE` | Browser engine to use | `chromium` | `chromium`, `firefox`, `webkit` |
+| `SCREENSHOT_DIR` | Directory for saving screenshots | `./screenshots` | Any valid path |
+| `PORT` | HTTP server port | `3000` | Any valid port number |
 
+### Claude Code Configuration
+
+To use this server with Claude Code (or Claude Desktop), add it to your MCP settings file.
+
+**Location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+**Basic Configuration:**
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
-  "method": "tools/call",
-  "params": {
-    "name": "browser_navigate",
-    "arguments": {
-      "url": "https://example.com",
-      "browserType": "chromium",
-      "sessionId": "my-session"
+  "mcpServers": {
+    "playwright": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/playwright-mcp/dist/stdio-server.js"
+      ],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "true"
+      }
     }
   }
 }
 ```
 
+**Configuration with Custom Settings:**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "/Users/yourname/.nvm/versions/node/v24.4.1/bin/node",
+      "args": [
+        "/Users/yourname/projects/playwright-mcp/dist/stdio-server.js"
+      ],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "false",
+        "BROWSER_TYPE": "chromium",
+        "SCREENSHOT_DIR": "/Users/yourname/projects/playwright-mcp/screenshots"
+      }
+    }
+  }
+}
+```
+
+**Development Configuration (using tsx):**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/absolute/path/to/playwright-mcp/src/stdio-server.ts"
+      ],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "false",
+        "BROWSER_TYPE": "firefox",
+        "SCREENSHOT_DIR": "/tmp/playwright-screenshots"
+      }
+    }
+  }
+}
+```
+
+**Using npm script:**
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npm",
+      "args": [
+        "run",
+        "start:stdio"
+      ],
+      "cwd": "/absolute/path/to/playwright-mcp",
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "true"
+      }
+    }
+  }
+}
+```
+
+> **Note:** After updating the configuration, restart Claude Code/Desktop for changes to take effect.
+
+### HTTP Transport (for n8n or other HTTP clients)
+
+Start the HTTP server:
+```bash
+npm start
+# or with custom port
+PORT=3001 npm start
+```
+
+The server will listen on `http://localhost:3000/mcp` (or your custom port).
+
+**Example HTTP Request:**
+```bash
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "navigate_url",
+      "arguments": {
+        "url": "https://example.com",
+        "sessionId": "my-session"
+      }
+    }
+  }'
+```
+
+## Usage Examples
+
+### Basic Navigation and Content Extraction
+
+```javascript
+// 1. Navigate to a page
+navigate_url({ url: "https://example.com" })
+
+// 2. Extract content from the page
+get_content({ selector: ".main-content" })
+
+// 3. Take a screenshot
+take_screenshot({ selector: ".important-section" })
+
+// 4. Close the session
+close_session({ sessionId: "default" })
+```
+
+### Multi-Step Workflow
+
+```javascript
+// 1. Navigate and create a session
+navigate_url({
+  url: "https://github.com/login",
+  sessionId: "github-session"
+})
+
+// 2. Click the login button
+click_element({
+  selector: "button[type='submit']",
+  sessionId: "github-session"
+})
+
+// 3. Run custom code to interact
+run_playwright({
+  sessionId: "github-session",
+  code: `
+    // Fill in login form
+    await page.fill('#login_field', 'username');
+    await page.fill('#password', 'password');
+    await page.click('[name="commit"]');
+
+    // Wait for navigation
+    await page.waitForNavigation();
+
+    return { loggedIn: true, url: page.url() };
+  `
+})
+
+// 4. Take screenshot of authenticated page
+take_screenshot({ sessionId: "github-session" })
+
+// 5. Close when done
+close_session({ sessionId: "github-session" })
+```
+
+### Using Different Browsers
+
+Set the `BROWSER_TYPE` environment variable:
+
+```bash
+# Use Firefox
+BROWSER_TYPE=firefox npm run start:stdio
+
+# Use WebKit (Safari engine)
+BROWSER_TYPE=webkit npm run start:stdio
+```
+
+### Taking Screenshots with Visible Browser
+
+Useful for debugging or demonstrations:
+
+```bash
+PLAYWRIGHT_HEADLESS=false npm run start:stdio
+```
+
 ## Session Management
 
-Browser sessions are persistent and identified by `sessionId`. If no `sessionId` is provided, a default session is used. This allows for multi-step browser automation workflows:
+Browser sessions are persistent and identified by `sessionId`. This allows for:
+- **Multi-step workflows** - Navigate, interact, and extract data across multiple tool calls
+- **Parallel sessions** - Run multiple independent browser sessions simultaneously
+- **Resource efficiency** - Reuse browser instances instead of creating new ones
 
-1. Navigate to a page
-2. Extract content from specific elements
-3. Take screenshots
-4. Navigate to another page in the same session
-5. Close the session when done
+**Session Lifecycle:**
+1. First `navigate_url` call creates a new session
+2. Subsequent calls with the same `sessionId` reuse the session
+3. Call `close_session` to explicitly close and free resources
+4. Sessions are automatically cleaned up when the server shuts down
 
-## Error Handling
+**Default Session:**
+- If no `sessionId` is provided, the default session `"default"` is used
+- This is convenient for single-tab workflows
 
-All tools return structured JSON responses with a `success` field indicating whether the operation completed successfully. Error details are provided in the `error` field when `success` is false.
+## Troubleshooting
+
+### Common Issues
+
+**1. Node.js version too old**
+```
+Error: Playwright requires Node.js 18 or higher
+```
+Solution: Update Node.js to version 18 or higher.
+
+**2. Browser not installed**
+```
+Error: Executable doesn't exist at /path/to/browser
+```
+Solution: Run `npm run install-browsers`
+
+**3. Permission denied (Claude Code)**
+```
+Error: EACCES: permission denied
+```
+Solution: Ensure the script has execute permissions and use absolute paths in configuration.
+
+**4. Port already in use (HTTP mode)**
+```
+Error: listen EADDRINUSE: address already in use :::3000
+```
+Solution: Change the port with `PORT=3001 npm start`
+
+### Debug Logging
+
+For stdio mode, logs are written to stderr and appear in Claude Code logs:
+- macOS: `~/Library/Logs/Claude/mcp-server-playwright.log`
+- Linux: `~/.config/Claude/logs/mcp-server-playwright.log`
+
+For HTTP mode, logs appear in the terminal where you started the server.
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `npm run build` to ensure it compiles
+5. Test your changes
+6. Submit a pull request
+
+## License
+
+MIT
+
+## Acknowledgments
+
+Built with:
+- [Playwright](https://playwright.dev/) - Browser automation
+- [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk) - MCP implementation
+- [Zod](https://zod.dev/) - Schema validation
+- [Express](https://expressjs.com/) - HTTP server (for n8n mode)

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ToolDefinition, ToolContext } from '../shared/types.js';
 import { createSuccessResponse, createErrorResponse, sanitizeText } from '../utils/responseUtils.js';
+import { getSession } from '../utils/browserUtils.js';
 
 const schema = z.object({
   sessionId: z.string().optional().describe('Session ID of the browser instance'),
@@ -15,7 +16,9 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const previewLength = 500;
     const verbose = false;
     const sessionKey = sessionId || 'default';
-    const session = context.browserSessions.get(sessionKey);
+
+    // Get existing browser session
+    const session = getSession(sessionKey, context.browserSessions);
 
     if (!session) {
       return createErrorResponse('No active browser session found. Use navigate_url first.');
