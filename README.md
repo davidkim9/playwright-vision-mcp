@@ -4,6 +4,41 @@
 
 A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
 
+- [Playwright MCP Server](#playwright-mcp-server)
+  - [Features](#features)
+  - [Available Tools](#available-tools)
+    - [1. `navigate_url`](#1-navigate_url)
+    - [2. `get_content`](#2-get_content)
+    - [3. `take_screenshot`](#3-take_screenshot)
+    - [4. `click_element`](#4-click_element)
+    - [5. `close_session`](#5-close_session)
+    - [6. `run_playwright`](#6-run_playwright)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Quick Start](#quick-start)
+  - [Development](#development)
+    - [Development Scripts](#development-scripts)
+    - [Project Structure](#project-structure)
+    - [Making Changes](#making-changes)
+    - [Adding New Tools](#adding-new-tools)
+  - [Configuration](#configuration)
+    - [Environment Variables](#environment-variables)
+    - [Claude Code Configuration](#claude-code-configuration)
+    - [HTTP Transport (for n8n or other HTTP clients)](#http-transport-for-n8n-or-other-http-clients)
+  - [Usage Examples](#usage-examples)
+    - [Basic Navigation and Content Extraction](#basic-navigation-and-content-extraction)
+    - [Multi-Step Workflow](#multi-step-workflow)
+    - [Using Different Browsers](#using-different-browsers)
+    - [Taking Screenshots with Visible Browser](#taking-screenshots-with-visible-browser)
+  - [Session Management](#session-management)
+  - [Troubleshooting](#troubleshooting)
+    - [Common Issues](#common-issues)
+    - [Debug Logging](#debug-logging)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+
+
 ## Features
 
 - 🌐 **Multi-Browser Support** - Chromium, Firefox, and WebKit
@@ -127,6 +162,8 @@ return { title, screenshotSize: screenshot.length };
    npm run start:stdio
    ```
 
+  For configuration based clients: [Claude Code Configuration](#claude-code-configuration)
+
 ## Development
 
 ### Development Scripts
@@ -236,28 +273,11 @@ Configure the server behavior using environment variables:
 
 ### Claude Code Configuration
 
-To use this server with Claude Code (or Claude Desktop), add it to your MCP settings file.
+To use this server with Claude Code (or Claude Desktop/Cursor), add it to your MCP settings file.
 
 **Location:**
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Linux: `~/.config/Claude/claude_desktop_config.json`
-
-**Basic Configuration:**
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/playwright-mcp/dist/stdio-server.js"
-      ],
-      "env": {
-        "PLAYWRIGHT_HEADLESS": "true"
-      }
-    }
-  }
-}
-```
 
 **Configuration with Custom Settings:**
 ```json
@@ -272,45 +292,6 @@ To use this server with Claude Code (or Claude Desktop), add it to your MCP sett
         "PLAYWRIGHT_HEADLESS": "false",
         "BROWSER_TYPE": "chromium",
         "SCREENSHOT_DIR": "/Users/yourname/projects/playwright-mcp/screenshots"
-      }
-    }
-  }
-}
-```
-
-**Development Configuration (using tsx):**
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "tsx",
-        "/absolute/path/to/playwright-mcp/src/stdio-server.ts"
-      ],
-      "env": {
-        "PLAYWRIGHT_HEADLESS": "false",
-        "BROWSER_TYPE": "firefox",
-        "SCREENSHOT_DIR": "/tmp/playwright-screenshots"
-      }
-    }
-  }
-}
-```
-
-**Using npm script:**
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npm",
-      "args": [
-        "run",
-        "start:stdio"
-      ],
-      "cwd": "/absolute/path/to/playwright-mcp",
-      "env": {
-        "PLAYWRIGHT_HEADLESS": "true"
       }
     }
   }
