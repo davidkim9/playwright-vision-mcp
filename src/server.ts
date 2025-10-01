@@ -101,7 +101,7 @@ app.delete('/mcp', async (req: Request, res: Response) => {
   }));
 });
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4201;
 app.listen(PORT, (error) => {
   if (error) {
     console.error('Failed to start server:', error);

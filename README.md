@@ -14,12 +14,13 @@ A powerful Model Context Protocol (MCP) server that provides browser automation 
 - 🎭 **Custom Scripts** - Execute arbitrary Playwright code
 - 🚀 **Dual Transport** - HTTP and stdio (for Claude Code)
 
+For detailed information about available tools, see [tools.md](tools.md).
+
 ## Table of Contents
 
 - [Playwright MCP Server](#playwright-mcp-server)
   - [Features](#features)
   - [Table of Contents](#table-of-contents)
-  - [Available Tools](#available-tools)
   - [Installation](#installation)
     - [Prerequisites](#prerequisites)
     - [Quick Start](#quick-start)
@@ -35,10 +36,6 @@ A powerful Model Context Protocol (MCP) server that provides browser automation 
   - [Contributing](#contributing)
   - [License](#license)
   - [Acknowledgments](#acknowledgments)
-
-## Available Tools
-
-See [tools.md](tools.md) for detailed information about all available tools.
 
 ## Installation
 
@@ -82,7 +79,6 @@ Configure the server behavior using environment variables:
 | `PLAYWRIGHT_HEADLESS` | Run browser in headless mode | `true` | `true`, `false` |
 | `BROWSER_TYPE` | Browser engine to use | `chromium` | `chromium`, `firefox`, `webkit` |
 | `SCREENSHOT_DIR` | Directory for saving screenshots | `./screenshots` | Any valid path |
-| `DISABLE_SCREENSHOT_DATA` | Disable returning screenshot as base64 | Not set | Any value to disable |
 | `PORT` | HTTP server port | `4201` | Any valid port number |
 
 ### Cursor / Claude Code / Claude Desktop Configuration
@@ -120,24 +116,6 @@ PORT=4201 npm start
 ```
 
 The server will listen on `http://localhost:4201/mcp` (or your custom port).
-
-**Example HTTP Request:**
-```bash
-curl -X POST http://localhost:4201/mcp \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "navigate_url",
-      "arguments": {
-        "url": "https://example.com",
-        "sessionId": "my-session"
-      }
-    }
-  }'
-```
 
 ## Development
 
