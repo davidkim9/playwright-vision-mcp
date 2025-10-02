@@ -7,7 +7,7 @@ const schema = z.object({
   url: z.string().url().describe('The URL to navigate to'),
   sessionId: z.string().optional().describe('Session ID to reuse browser instance'),
   waitUntil: z.enum(['networkidle', 'load', 'domcontentloaded']).optional().describe('Navigation readiness. If it times out, tool will fall back automatically.'),
-  timeoutMs: z.number().int().positive().optional().describe('Navigation timeout per attempt in milliseconds'),
+  timeoutMs: z.number().int().min(1).optional().describe('Navigation timeout per attempt in milliseconds'),
   retries: z.number().int().min(0).max(5).optional().describe('Number of retry cycles after trying all fallbacks'),
   retryDelayMs: z.number().int().min(0).max(10000).optional().describe('Delay between retry cycles in milliseconds')
 });

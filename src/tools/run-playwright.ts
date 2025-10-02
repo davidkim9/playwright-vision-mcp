@@ -8,7 +8,7 @@ const schema = z.object({
   code: z.string().min(1).describe(
     'Async JavaScript code body to run with access to page, context, browser, params, console. Example: await page.click("a"); return await page.title();'
   ),
-  timeoutMs: z.number().int().positive().max(120000).optional().describe('Execution timeout in milliseconds (default 15000)')
+  timeoutMs: z.number().int().min(1).max(120000).optional().describe('Execution timeout in milliseconds (default 15000)')
 });
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
