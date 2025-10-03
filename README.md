@@ -81,6 +81,7 @@ Configure the server behavior using environment variables:
 | `SCREENSHOT_DIR` | Directory for saving screenshots | `./screenshots` | Any valid path |
 | `PORT` | HTTP server port | `4201` | Any valid port number |
 | `MCP_AUTH_TOKEN` | Authentication token for HTTP server (optional) | None | Any string |
+| `RETURN_SCREENSHOTS` | Return base64 screenshot data to agent | `false` | `true`, `false` |
 
 ### Cursor / Claude Code / Claude Desktop Configuration
 
@@ -98,7 +99,8 @@ To use this server with Cursor/Claude Code/Claude Desktop, add it to your MCP se
       "env": {
         "PLAYWRIGHT_HEADLESS": "false",
         "BROWSER_TYPE": "chromium",
-        "SCREENSHOT_DIR": "/Users/yourname/projects/playwright-mcp/screenshots"
+        "SCREENSHOT_DIR": "/Users/yourname/projects/playwright-mcp/screenshots",
+        "RETURN_SCREENSHOTS": "false"
       }
     }
   }
