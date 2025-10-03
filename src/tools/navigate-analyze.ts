@@ -5,7 +5,11 @@ import { getOrCreateSession, getBrowserType } from '../utils/browserUtils.js';
 
 const schema = z.object({
   url: z.string().url().describe('The URL to navigate to'),
-  sessionId: z.string().optional().describe('Session ID to reuse browser instance')
+  sessionId: z.string().optional().describe('Session ID to reuse browser instance'),
+  waitUntil: z.enum(['networkidle', 'load', 'domcontentloaded']).optional().describe('Navigation readiness. If it times out, tool will fall back automatically.'),
+  timeoutMs: z.number().int().min(1).optional().describe('Navigation timeout per attempt in milliseconds'),
+  retries: z.number().int().min(0).max(5).optional().describe('Number of retry cycles after trying all fallbacks'),
+  retryDelayMs: z.number().int().min(0).max(10000).optional().describe('Delay between retry cycles in milliseconds')
 });
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
@@ -13,8 +17,10 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const { url, sessionId } = params;
     // Sensible defaults kept internally to maintain functionality
     const browserType = getBrowserType();
-    const waitForLoad = true;
-    const timeout = 30000;
+    const timeoutMs = params.timeoutMs ?? 30000;
+    const requestedWaitUntil = params.waitUntil;
+    const retries = params.retries ?? 1; // number of retry cycles after exhausting fallbacks
+    const retryDelayMs = params.retryDelayMs ?? 750;
     const sectionTypes: Array<'semantic' | 'visual' | 'layout'> = ['semantic', 'visual'];
     const minSectionSize = 100;
     const includeHidden = false;
@@ -25,10 +31,40 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     // Get or create browser session
     const session = await getOrCreateSession(sessionKey, browserType, context.browserSessions);
 
-    const response = await session.page.goto(url, {
-      waitUntil: waitForLoad ? 'networkidle' : 'domcontentloaded',
-      timeout
-    });
+    // Build waitUntil fallback order
+    const fallbackWaits: Array<'networkidle' | 'load' | 'domcontentloaded'> = requestedWaitUntil
+      ? [requestedWaitUntil, 'load', 'domcontentloaded']
+      : ['networkidle', 'load', 'domcontentloaded'];
+
+    // Attempt navigation with fallback and retries
+    const navigateWithFallback = async () => {
+      let lastError: unknown;
+      for (let cycle = 0; cycle <= retries; cycle++) {
+        for (const waitUntil of fallbackWaits) {
+          try {
+            const resp = await session.page.goto(url, { waitUntil, timeout: timeoutMs });
+            return { response: resp, waitUntilUsed: waitUntil } as const;
+          } catch (error) {
+            lastError = error;
+            const message = error instanceof Error ? error.message : String(error);
+            const isTimeout = message.toLowerCase().includes('timeout');
+            // Only fall back on timeouts; other errors should surface immediately
+            if (!isTimeout) {
+              throw error;
+            }
+            // try next fallback
+          }
+        }
+        if (cycle < retries) {
+          await session.page.waitForTimeout(retryDelayMs);
+        }
+      }
+      throw lastError instanceof Error
+        ? new Error(`Navigation timed out after ${retries + 1} attempt(s). Consider lowering waitUntil or increasing timeoutMs. Last error: ${lastError.message}`)
+        : new Error('Navigation failed with unknown error');
+    };
+
+    const { response, waitUntilUsed } = await navigateWithFallback();
 
     const pageTitle = await session.page.title();
 
@@ -195,7 +231,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
         totalInternalLinks: analysis.internalLinks.length,
         visibleLinks: analysis.internalLinks.filter((link: any) => link.isVisible).length
       },
-      message: `Successfully navigated to ${url}. Analyzed ${analysis.sections.length} sections and found ${analysis.internalLinks.length} internal links.`
+      message: `Successfully navigated to ${url} (waitUntil=${waitUntilUsed}). Analyzed ${analysis.sections.length} sections and found ${analysis.internalLinks.length} internal links.`
     });
   } catch (error) {
     return createErrorResponse(error instanceof Error ? error.message : 'Unknown error occurred during navigation and analysis');
