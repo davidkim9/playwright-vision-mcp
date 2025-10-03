@@ -63,7 +63,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const pageTitle = await session.page.title();
     const currentUrl = session.page.url();
 
-    return createSuccessResponse({
+    const responseData: any = {
       success: true,
       sessionId: sessionKey,
       url: currentUrl,
@@ -73,7 +73,14 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
       size: screenshotBuffer.length,
       path: outputPath,
       message: `Successfully captured screenshot of ${target}`
-    });
+    };
+
+    // Include screenshot data if enabled via environment variable
+    if (process.env.RETURN_SCREENSHOTS === 'true') {
+      responseData.data = screenshotBuffer.toString('base64');
+    }
+
+    return createSuccessResponse(responseData);
   } catch (error) {
     return createErrorResponse(error instanceof Error ? error.message : 'Unknown error occurred during screenshot');
   }

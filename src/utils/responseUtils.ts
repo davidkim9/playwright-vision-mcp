@@ -1,32 +1,11 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 export function createSuccessResponse(data: any): CallToolResult {
-  // Defensive: never include raw base64 image data in responses
-  const sanitized = (() => {
-    try {
-      const clone = JSON.parse(JSON.stringify(data));
-      const stripBase64 = (obj: any) => {
-        if (!obj || typeof obj !== 'object') return;
-        for (const key of Object.keys(obj)) {
-          const value = obj[key];
-          if (key.toLowerCase() === 'base64') {
-            delete obj[key];
-            continue;
-          }
-          if (value && typeof value === 'object') stripBase64(value);
-        }
-      };
-      stripBase64(clone);
-      return clone;
-    } catch {
-      return data;
-    }
-  })();
   return {
     content: [
       {
         type: 'text',
-        text: JSON.stringify(sanitized)
+        text: JSON.stringify(data)
       }
     ]
   };
