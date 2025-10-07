@@ -1,18 +1,21 @@
 {
-  "name": "n8n-playwright-mcp-server",
+  "name": "simple-playwright-mcp",
   "version": "1.0.0",
   "description": "n8n MCP server with Playwright browser automation capabilities",
   "main": "dist/http-server.js",
   "type": "module",
+  "bin": {
+    "simple-playwright-mcp": "dist/stdio-server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/http-server.js",
     "start:stdio": "node dist/stdio-server.js",
     "dev": "tsx src/http-server.ts",
     "dev:stdio": "tsx src/stdio-server.ts",
-    "dev:old": "tsx src/n8n-mcp-server.ts",
     "install-browsers": "playwright install",
-    "postinstall": "npm run build && playwright install"
+    "prepare": "npm run build",
+    "postinstall": "playwright install"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",

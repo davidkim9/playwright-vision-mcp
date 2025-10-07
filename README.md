@@ -1,8 +1,10 @@
-# Playwright MCP Server
+# Simple Playwright MCP Server
 
 ![Let it run code](image.png)
 
 A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude/Cursor/ChatGPT to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
+
+This package minimizes the amount of tools to help AI Agents pick the right tool for a given prompt.
 
 ## Features
 
@@ -18,7 +20,7 @@ For detailed information about available tools, see [tools.md](tools.md).
 
 ## Table of Contents
 
-- [Playwright MCP Server](#playwright-mcp-server)
+- [Simple Playwright MCP Server](#simple-playwright-mcp-server)
   - [Features](#features)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)

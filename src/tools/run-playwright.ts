@@ -98,5 +98,3 @@ export const runPlaywright: ToolDefinition = {
   inputSchema: schema,
   handler
 };
-
-
