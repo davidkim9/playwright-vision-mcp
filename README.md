@@ -23,9 +23,8 @@ For detailed information about available tools, see [tools.md](tools.md).
 - [Simple Playwright MCP Server](#simple-playwright-mcp-server)
   - [Features](#features)
   - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
+  - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
-    - [Quick Start](#quick-start)
   - [Configuration](#configuration)
     - [Environment Variables](#environment-variables)
     - [Cursor / Claude Code / Claude Desktop Configuration](#cursor--claude-code--claude-desktop-configuration)
@@ -39,36 +38,11 @@ For detailed information about available tools, see [tools.md](tools.md).
   - [License](#license)
   - [Acknowledgments](#acknowledgments)
 
-## Installation
+## Getting Started
 
 ### Prerequisites
 - Node.js 18 or higher
 - npm or yarn
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd playwright-mcp
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-   This will install + build + install playwright browsers
-
-3. **Run the server (http only)**
-
-
-   For HTTP transport (n8n):
-   ```bash
-   npm start
-   ```
-
-   For configuration based clients: [MCP Configuration](#configuration)
 
 ## Configuration
 
@@ -94,9 +68,9 @@ To use this server with Cursor/Claude Code/Claude Desktop, add it to your MCP se
 {
   "mcpServers": {
     "playwright": {
-      "command": "/Users/yourname/.nvm/versions/node/v24.4.1/bin/node",
+      "command": "npx",
       "args": [
-        "/Users/yourname/projects/playwright-mcp/dist/stdio-server.js"
+        "simple-playwright-mcp"
       ],
       "env": {
         "PLAYWRIGHT_HEADLESS": "false",
@@ -115,6 +89,7 @@ To use this server with Cursor/Claude Code/Claude Desktop, add it to your MCP se
 
 Start the HTTP server:
 ```bash
+npm install
 npm start
 # or with custom port
 PORT=4201 npm start
@@ -152,6 +127,8 @@ curl -X POST http://localhost:4201/mcp \
 ### Development Scripts
 
 ```bash
+npm install
+
 # Start HTTP server with auto-reload
 npm run dev
 
@@ -214,7 +191,6 @@ Contributions are welcome! Please:
 ## License
 
 MIT
-
 ## Acknowledgments
 
 Built with:
@@ -222,3 +198,4 @@ Built with:
 - [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk) - MCP implementation
 - [Zod](https://zod.dev/) - Schema validation
 - [Express](https://expressjs.com/) - HTTP server (for n8n mode)
+
