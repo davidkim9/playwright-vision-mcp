@@ -4,6 +4,9 @@
   "description": "n8n MCP server with Playwright browser automation capabilities",
   "main": "dist/http-server.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "bin": {
     "simple-playwright-mcp": "dist/stdio-server.js"
   },
