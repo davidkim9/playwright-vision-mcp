@@ -1,8 +1,8 @@
-# Simple Playwright MCP Server
+# Playwright Vision MCP Server
 
 ![Let it run code](image.png)
 
-A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude/Cursor/ChatGPT to interact with web pages, extract content, take screenshots, and execute custom browser automation scripts.
+A powerful Model Context Protocol (MCP) server that provides browser automation capabilities using Playwright. This server enables AI assistants like Claude/Cursor/ChatGPT to interact with web pages, extract content, analyze screenshots, and execute custom browser automation scripts.
 
 This package minimizes the amount of tools to help AI Agents pick the right tool for a given prompt.
 
@@ -20,7 +20,7 @@ For detailed information about available tools, see [tools.md](tools.md).
 
 ## Table of Contents
 
-- [Simple Playwright MCP Server](#simple-playwright-mcp-server)
+- [Playwright Vision MCP Server](#playwright-vision-mcp-server)
   - [Features](#features)
   - [Table of Contents](#table-of-contents)
   - [Getting Started](#getting-started)
@@ -57,7 +57,8 @@ Configure the server behavior using environment variables:
 | `SCREENSHOT_DIR` | Directory for saving screenshots | `./screenshots` | Any valid path |
 | `PORT` | HTTP server port | `4201` | Any valid port number |
 | `MCP_AUTH_TOKEN` | Authentication token for HTTP server (optional) | None | Any string |
-| `RETURN_SCREENSHOTS` | Return base64 screenshot data to agent | `false` | `true`, `false` |
+| `OPENAI_API_KEY` | OpenAI API key (required for `analyze_image`) | None | String |
+| `OPENAI_VISION_MODEL` | Vision model for `analyze_image` | `gpt-4.1-mini` | Any supported OpenAI vision model |
 
 ### Cursor / Claude Code / Claude Desktop Configuration
 
@@ -70,13 +71,13 @@ To use this server with Cursor/Claude Code/Claude Desktop, add it to your MCP se
     "playwright": {
       "command": "npx",
       "args": [
-        "simple-playwright-mcp"
+        "playwright-vision-mcp"
       ],
       "env": {
         "PLAYWRIGHT_HEADLESS": "false",
+        "SCREENSHOT_DIR": "/Users/username/path/to/screenshots",
         "BROWSER_TYPE": "chromium",
-        "SCREENSHOT_DIR": "/Users/yourname/projects/playwright-mcp/screenshots",
-        "RETURN_SCREENSHOTS": "false"
+        "OPENAI_API_KEY": "your-openai-api-key"
       }
     }
   }

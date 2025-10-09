@@ -10,7 +10,8 @@ const browserSessions: BrowserSessions = new Map();
 
 // Create tool context
 const toolContext: ToolContext = {
-  browserSessions
+  browserSessions,
+  currentSessionId: null
 };
 
 const getServer = () => {

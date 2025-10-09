@@ -1,4 +1,5 @@
-import { chromium, firefox, webkit, Browser } from 'playwright';
+import { Browser, chromium, firefox, webkit } from 'playwright';
+
 import type { BrowserSession, BrowserSessions } from '../shared/types.js';
 
 export type BrowserType = 'chromium' | 'firefox' | 'webkit';
@@ -44,6 +45,15 @@ export function getSession(
   browserSessions: BrowserSessions
 ): BrowserSession | undefined {
   return browserSessions.get(sessionKey);
+}
+
+/**
+ * Generate a URL-safe session ID
+ */
+export function generateSessionId(): string {
+  const random = Math.random().toString(36).slice(2, 10);
+  const time = Date.now().toString(36);
+  return `sess_${time}_${random}`;
 }
 
 /**

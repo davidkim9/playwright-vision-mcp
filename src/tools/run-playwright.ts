@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { ToolDefinition, ToolContext } from '../shared/types.js';
-import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+
+import type { ToolContext, ToolDefinition } from '../shared/types.js';
 import { getSession } from '../utils/browserUtils.js';
+import { createErrorResponse, createSuccessResponse } from '../utils/responseUtils.js';
 
 const schema = z.object({
-  sessionId: z.string().optional().describe('Session ID of the browser instance'),
   code: z.string().min(1).describe(
     'Async JavaScript code body to run with access to page, context, browser, params, console. Example: await page.click("a"); return await page.title();'
   ),
@@ -13,9 +13,12 @@ const schema = z.object({
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
   try {
-    const { sessionId, code } = params;
+    const { code } = params;
     const timeoutMs = params.timeoutMs ?? 15000;
-    const sessionKey = sessionId || 'default';
+    const sessionKey = context.currentSessionId || null;
+    if (!sessionKey) {
+      return createErrorResponse('No active browser session found. Use navigate_url first.');
+    }
     const session = getSession(sessionKey, context.browserSessions);
 
     if (!session) {
@@ -94,7 +97,7 @@ function safeToString(value: any): string {
 
 export const runPlaywright: ToolDefinition = {
   name: 'run_playwright',
-  description: 'Execute custom async Playwright code using the active session (page, context, browser available)',
+  description: 'Execute custom async Playwright code using the server-managed session',
   inputSchema: schema,
   handler
 };

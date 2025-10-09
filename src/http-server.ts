@@ -11,7 +11,8 @@ const browserSessions: BrowserSessions = new Map();
 
 // Create tool context
 const toolContext: ToolContext = {
-  browserSessions
+  browserSessions,
+  currentSessionId: null
 };
 
 // Authentication middleware

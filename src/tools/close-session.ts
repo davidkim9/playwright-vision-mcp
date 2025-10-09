@@ -1,62 +1,40 @@
 import { z } from 'zod';
-import type { ToolDefinition, ToolContext } from '../shared/types.js';
-import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
-import { getSession } from '../utils/browserUtils.js';
 
-const schema = z.object({
-  sessionId: z.string().optional().describe('Session ID of the browser instance to close. If not provided, closes all sessions')
-});
+import type { ToolContext, ToolDefinition } from '../shared/types.js';
+import { createErrorResponse, createSuccessResponse } from '../utils/responseUtils.js';
 
-async function handler(params: z.infer<typeof schema>, context: ToolContext) {
+const schema = z.object({});
+
+async function handler(_: z.infer<typeof schema>, context: ToolContext) {
   try {
-    const { sessionId } = params;
+    // Close all sessions (server-managed)
+    const sessionIds = Array.from(context.browserSessions.keys());
+    const results: Array<{ sessionId: string; status: 'closed' | 'error'; error?: string }> = [];
 
-    if (sessionId) {
-      const sessionKey = sessionId === 'default' ? 'default' : sessionId;
-      const session = getSession(sessionKey, context.browserSessions);
-
-      if (!session) {
-        return createErrorResponse(`No browser session found with ID: ${sessionKey}`);
-      }
-
-      await session.browser.close();
-      context.browserSessions.delete(sessionKey);
-
-      return createSuccessResponse({
-        success: true,
-        sessionId: sessionKey,
-        message: `Successfully closed browser session: ${sessionKey}`
-      });
-    } else {
-      // Close all sessions
-      const sessionIds = Array.from(context.browserSessions.keys());
-      const results = [];
-
-      for (const sessionKey of sessionIds) {
-        const session = context.browserSessions.get(sessionKey);
-        if (session) {
-          try {
-            await session.browser.close();
-            context.browserSessions.delete(sessionKey);
-            results.push({ sessionId: sessionKey, status: 'closed' });
-          } catch (error) {
-            results.push({
-              sessionId: sessionKey,
-              status: 'error',
-              error: error instanceof Error ? error.message : 'Unknown error'
-            });
-          }
+    for (const sessionKey of sessionIds) {
+      const session = context.browserSessions.get(sessionKey);
+      if (session) {
+        try {
+          await session.browser.close();
+          context.browserSessions.delete(sessionKey);
+          results.push({ sessionId: sessionKey, status: 'closed' });
+        } catch (error) {
+          results.push({
+            sessionId: sessionKey,
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
         }
       }
-
-      return createSuccessResponse({
-        success: true,
-        closedSessions: results.filter(r => r.status === 'closed').length,
-        errors: results.filter(r => r.status === 'error').length,
-        results,
-        message: `Closed ${results.filter(r => r.status === 'closed').length} browser sessions`
-      });
     }
+
+    return createSuccessResponse({
+      success: true,
+      closedSessions: results.filter(r => r.status === 'closed').length,
+      errors: results.filter(r => r.status === 'error').length,
+      results,
+      message: `Closed ${results.filter(r => r.status === 'closed').length} browser sessions`
+    });
   } catch (error) {
     return createErrorResponse(error instanceof Error ? error.message : 'Unknown error occurred during session close');
   }
@@ -64,7 +42,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
 export const closeSession: ToolDefinition = {
   name: 'close_session',
-  description: 'Close browser sessions to free up resources',
+  description: 'Close all browser sessions managed by the server and clear current session',
   inputSchema: schema,
   handler
 };

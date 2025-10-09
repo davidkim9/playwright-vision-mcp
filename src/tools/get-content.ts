@@ -1,21 +1,25 @@
 import { z } from 'zod';
-import type { ToolDefinition, ToolContext } from '../shared/types.js';
-import { createSuccessResponse, createErrorResponse, sanitizeText } from '../utils/responseUtils.js';
+
+import type { ToolContext, ToolDefinition } from '../shared/types.js';
 import { getSession } from '../utils/browserUtils.js';
+import { createErrorResponse, createSuccessResponse, sanitizeText } from '../utils/responseUtils.js';
 
 const schema = z.object({
-  sessionId: z.string().optional().describe('Session ID of the browser instance'),
   selector: z.string().optional().describe('CSS selector to extract content. If omitted, extracts full page')
 });
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
   try {
-    const { sessionId, selector } = params;
+    const { selector } = params;
     // Defaults preserved internally
     const contentType = 'text' as const;
     const previewLength = 500;
     const verbose = false;
-    const sessionKey = sessionId || 'default';
+    const sessionKey = context.currentSessionId || null;
+
+    if (!sessionKey) {
+      return createErrorResponse('No active browser session found. Use navigate_url first.');
+    }
 
     // Get existing browser session
     const session = getSession(sessionKey, context.browserSessions);
@@ -76,7 +80,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
 export const getContent: ToolDefinition = {
   name: 'get_content',
-  description: 'Extract content from the page or specific sections identified by navigate_url analysis',
+  description: 'Extract content from the page using the server-managed session',
   inputSchema: schema,
   handler
 };

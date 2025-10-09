@@ -1,17 +1,20 @@
 import { z } from 'zod';
-import type { ToolDefinition, ToolContext } from '../shared/types.js';
-import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
+
+import type { ToolContext, ToolDefinition } from '../shared/types.js';
 import { getSession } from '../utils/browserUtils.js';
+import { createErrorResponse, createSuccessResponse } from '../utils/responseUtils.js';
 
 const schema = z.object({
-  sessionId: z.string().optional().describe('Session ID of the browser instance'),
   selector: z.string().describe('CSS selector of the element to click')
 });
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
   try {
-    const { sessionId, selector } = params;
-    const sessionKey = sessionId || 'default';
+    const { selector } = params;
+    const sessionKey = context.currentSessionId || null;
+    if (!sessionKey) {
+      return createErrorResponse('No active browser session found. Use navigate_url first.');
+    }
     const session = getSession(sessionKey, context.browserSessions);
 
     if (!session) {
@@ -45,7 +48,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
 export const clickElement: ToolDefinition = {
   name: 'click_element',
-  description: 'Click on elements using various targeting methods including sections from navigate_url analysis',
+  description: 'Click on elements using the server-managed session',
   inputSchema: schema,
   handler
 };
