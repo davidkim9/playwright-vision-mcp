@@ -1,11 +1,10 @@
 import { z } from 'zod';
 import type { ToolDefinition, ToolContext } from '../shared/types.js';
 import { createSuccessResponse, createErrorResponse } from '../utils/responseUtils.js';
-import { getOrCreateSession, getBrowserType } from '../utils/browserUtils.js';
+import { getOrCreateSession, getBrowserType, generateSessionId } from '../utils/browserUtils.js';
 
 const schema = z.object({
   url: z.string().url().describe('The URL to navigate to'),
-  sessionId: z.string().optional().describe('Session ID to reuse browser instance'),
   waitUntil: z.enum(['networkidle', 'load', 'domcontentloaded']).optional().describe('Navigation readiness. If it times out, tool will fall back automatically.'),
   timeoutMs: z.number().int().min(1).optional().describe('Navigation timeout per attempt in milliseconds'),
   retries: z.number().int().min(0).max(5).optional().describe('Number of retry cycles after trying all fallbacks'),
@@ -14,7 +13,7 @@ const schema = z.object({
 
 async function handler(params: z.infer<typeof schema>, context: ToolContext) {
   try {
-    const { url, sessionId } = params;
+    const { url } = params;
     // Sensible defaults kept internally to maintain functionality
     const browserType = getBrowserType();
     const timeoutMs = params.timeoutMs ?? 30000;
@@ -26,9 +25,14 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const includeHidden = false;
     const maxSections = 15;
     const verbose = false;
-    const sessionKey = sessionId || 'default';
+    // Determine or create the current session ID
+    let sessionKey = context.currentSessionId || null;
+    if (!sessionKey) {
+      sessionKey = generateSessionId();
+      context.currentSessionId = sessionKey;
+    }
 
-    // Get or create browser session
+    // Get or create browser session under the current session ID
     const session = await getOrCreateSession(sessionKey, browserType, context.browserSessions);
 
     // Build waitUntil fallback order
@@ -240,7 +244,7 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
 
 export const navigateAnalyze: ToolDefinition = {
   name: 'navigate_url',
-  description: 'Navigate to a URL and automatically analyze page sections and extract internal links',
+  description: 'Navigate to a URL using a server-managed session and analyze sections and internal links',
   inputSchema: schema,
   handler
 };

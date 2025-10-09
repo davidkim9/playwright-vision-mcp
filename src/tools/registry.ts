@@ -1,11 +1,9 @@
 import type { ToolDefinition } from '../shared/types.js';
-
-// Simplified combined tools
-import { navigateAnalyze } from './navigate-analyze.js';
+import { analyzeImage } from './analyze-image.js';
 import { clickElement } from './click-element.js';
-import { getContent } from './get-content.js';
-import { takeScreenshot } from './screenshot.js';
 import { closeSession } from './close-session.js';
+import { getContent } from './get-content.js';
+import { navigateAnalyze } from './navigate-analyze.js';
 import { runPlaywright } from './run-playwright.js';
 
 /**
@@ -18,14 +16,22 @@ import { runPlaywright } from './run-playwright.js';
  * - take_screenshot: Screenshots with section support
  * - close_session: Session management
  */
-export const AVAILABLE_TOOLS: ToolDefinition[] = [
+const baseTools: ToolDefinition[] = [
   navigateAnalyze,
   clickElement,
   getContent,
-  takeScreenshot,
   closeSession,
   runPlaywright
 ];
+
+// Conditionally add OpenAI Vision tool when API key is present
+export const AVAILABLE_TOOLS: ToolDefinition[] = (() => {
+  const tools = [...baseTools];
+  if (process.env.OPENAI_API_KEY) {
+    tools.push(analyzeImage);
+  }
+  return tools;
+})();
 
 /**
  * Get all registered tools

@@ -24,4 +24,5 @@ export interface ToolDefinition {
 
 export interface ToolContext {
   browserSessions: BrowserSessions;
+  currentSessionId?: string | null;
 }
