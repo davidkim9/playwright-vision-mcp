@@ -68,7 +68,7 @@ To use this server with Cursor/Claude Code/Claude Desktop, add it to your MCP se
 ```json
 {
   "mcpServers": {
-    "playwright": {
+    "playwright-vision": {
       "command": "npx",
       "args": [
         "playwright-vision-mcp"
