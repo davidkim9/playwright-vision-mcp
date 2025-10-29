@@ -49,7 +49,12 @@ async function handler(params: z.infer<typeof schema>, context: ToolContext) {
     const imageUrl = base64DataUri;
 
     // Call OpenAI Vision with the uploaded image URL
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
+    });
+
+
     const model = process.env.OPENAI_VISION_MODEL || 'gpt-4.1-mini';
 
     const completion = await client.chat.completions.create({
