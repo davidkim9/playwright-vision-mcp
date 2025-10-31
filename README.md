@@ -58,6 +58,7 @@ Configure the server behavior using environment variables:
 | `PORT` | HTTP server port | `4201` | Any valid port number |
 | `MCP_AUTH_TOKEN` | Authentication token for HTTP server (optional) | None | Any string |
 | `OPENAI_API_KEY` | OpenAI API key (required for `analyze_image`) | None | String |
+| `OPENAI_BASE_URL`  | Optional custom base URL for OpenAI-compatible APIs   | `https://api.openai.com/v1`    | String |
 | `OPENAI_VISION_MODEL` | Vision model for `analyze_image` | `gpt-4.1-mini` | Any supported OpenAI vision model |
 
 ### Cursor / Claude Code / Claude Desktop Configuration
